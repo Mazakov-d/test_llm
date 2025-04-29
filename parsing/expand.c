@@ -6,7 +6,7 @@
 /*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 13:27:45 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/04/27 15:15:25 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/04/27 15:22:32 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -98,7 +98,7 @@ char	*expand_var(char *line, t_all *all, int i, int j)
 		is_in_quote(line[i], &sq, &dq);
 		if (should_expand(line, i, sq))
 		{
-			j = find_var_end(line, &sq, &dq);
+			j = find_var_end(line + i, &sq, &dq);
 			line = search_var_in_env(line, line + i, (j - i - 1), all);
 			if (!line)
 				return (NULL);
