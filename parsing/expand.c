@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expand.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yafahfou <yafahfou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 13:27:45 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/04/27 15:22:32 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/04/29 13:00:32 by yafahfou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,21 +46,21 @@ char	*expand_status(char *line, int status)
 	return (result);
 }
 
-int	find_var_end(char *line, int *sq, int *dq)
+int	find_var_end(char *line, int i, int *sq, int *dq)
 {
-	int	i;
+	int	j;
 	int	save;
 
-	i = 0;
+	j = i;
 	save = *dq;
-	while (line && line[i] && line[i] != ' ' && !(*sq % 2))
+	while (line[j] && line[j] != ' ' && !(*sq % 2))
 	{
-		is_in_quote(line[i], sq, dq);
+		is_in_quote(line[j], sq, dq);
 		if (*dq != save)
 			break;
-		i++;
+		j++;
 	}
-	return (i);
+	return (j);
 }
 
 char *search_var_in_env(char *line, char *var, int end_var, t_all *all)
@@ -71,7 +71,10 @@ char *search_var_in_env(char *line, char *var, int end_var, t_all *all)
 
 	var_name = ft_strndup(var + 1, end_var);
 	if (!var_name)
+	{
+		free(line);
 		return (NULL);
+	}
 	ptr = find_in_env(all->env, var_name);
 	if (ft_strcmp("?", var_name) == 2)
 		expanded_line = expand_status(line, all->status);
@@ -79,26 +82,24 @@ char *search_var_in_env(char *line, char *var, int end_var, t_all *all)
 		expanded_line = expand_null(line, 0, 0);
 	else
 		expanded_line = expand_line_var(line, ptr->line, 0, 0);
-	if (expanded_line)
-		free(line);
+	free(line);
 	free(var_name);
 	return (expanded_line);
 }
 
 char	*expand_var(char *line, t_all *all, int i, int j)
 {
-	int	dq;
 	int	sq;
+	int	dq;
 
 	dq = 0;
 	sq = 0;
-	j = 0;
 	while (line && line[i])
 	{
 		is_in_quote(line[i], &sq, &dq);
 		if (should_expand(line, i, sq))
 		{
-			j = find_var_end(line + i, &sq, &dq);
+			j = find_var_end(line, i, &sq, &dq);
 			line = search_var_in_env(line, line + i, (j - i - 1), all);
 			if (!line)
 				return (NULL);

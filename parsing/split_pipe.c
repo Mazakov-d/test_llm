@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   split_pipe.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 13:45:18 by yassinefahf       #+#    #+#             */
-/*   Updated: 2025/04/27 13:29:41 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/04/29 11:57:50 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,7 +66,7 @@ int alloc_n_write(char **res, char const *s, char *delim)
 	i = 0;
 	i_res = 0;
 	sq = 0;
-	while (s[i])
+	while (s && s[i])
 	{
 		while (s[i] && (pos_in_str(delim, s[i])) >= 0)
 			i++;

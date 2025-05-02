@@ -6,7 +6,7 @@
 /*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 13:14:10 by mazakov           #+#    #+#             */
-/*   Updated: 2025/04/27 15:15:37 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/04/30 15:03:02 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@
 
 #define INFILE 1
 #define OUTFILE 2
+#define PIPE 3
+#define NONE 4
+#define APPEND 5
 
 typedef enum e_builtin
 {
@@ -119,7 +122,7 @@ int ft_export(t_env *env, char *new_var);
 /*
 ** builtin/ft_pwd.c
 */
-int ft_pwd(void);
+int ft_pwd(t_all *all);
 
 /*
 ** builtin/ft_unset.c
@@ -219,9 +222,17 @@ int len_nb(int nb);
 char *ft_itoa(int nb);
 
 /*
+**
+*/
+int is_outfile(char *s);
+int is_here_doc(char *s);
+int	is_append(char *s);
+int is_infile(char *s);
+
+/*
 ** parsing/init.c
 */
-t_data *init_data(void);
+t_data *init_data(int mode);
 t_all *init_all(char **env);
 t_cmds *add_next_cmds(t_cmds *current);
 t_data *add_next_data(t_data *current);
@@ -232,7 +243,7 @@ t_cmds *remove_cmd(t_cmds *current);
 */
 int should_expand(char *line, int i, int sq);
 char *expand_status(char *line, int status);
-int find_var_end(char *line, int *sq, int *dq);
+int find_var_end(char *line, int i, int *sq, int *dq);
 char *search_var_in_env(char *line, char *var, int end_var, t_all *all);
 char *expand_var(char *line, t_all *all, int i, int j);
 
@@ -251,7 +262,7 @@ char *expand_line_var(char *line, char *var_value, int i_var, int sq);
 */
 int word_len(char *str);
 char *str_dup_minishell(char *s, int *i, int k, int j);
-void split_quote_and_space(char *str, t_all *all);
+int split_quote_and_space(char *str, t_all *all);
 
 /*
 ** parsing/split_pipe.c
@@ -277,7 +288,7 @@ void handle_line(t_all **all, char *line);
 ** main.c
 */
 void new_line(t_all *all);
-void exit_parse(char *s, t_all *all, int status);
+void exit_parse(char *line, char *s, t_all *all, int status);
 int is_parse_err(char c);
 int parse_error(char *str, t_all *all);
 int is_closed(char *line);

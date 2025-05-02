@@ -6,7 +6,7 @@
 /*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 13:46:31 by yassinefahf       #+#    #+#             */
-/*   Updated: 2025/04/27 13:48:42 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/04/15 13:24:53 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,6 +31,5 @@ void	*free_strs(char **strs)
 	}
 	if (strs)
 		free(strs);
-	strs = NULL;
 	return (NULL);
 }

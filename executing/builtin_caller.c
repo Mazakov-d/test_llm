@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   builtin_caller.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 16:16:05 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/04/22 15:17:32 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/04/30 15:03:37 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ int	builtin_caller(t_all *all, int builtin)
 		ft_env(all->env);
 	else if (builtin == PWD)
 	{
-		if (ft_pwd())
+		if (ft_pwd(all))
 			ft_exit(all, NULL);
 	}
 	else

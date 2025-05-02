@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expand_var.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 13:29:39 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/04/27 15:01:05 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/04/29 14:05:42 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,9 @@ static char	*alloc_expanded_str(char *line, char *var_value, int i_var)
 {
 	char *s;
 
+	(void)var_value;
+	(void)i_var;
+	(void)line;
 	s = ft_calloc(sizeof(char), (ft_strlen(line) + 
 		ft_strlen(var_value + i_var) + 2));
 	return (s);

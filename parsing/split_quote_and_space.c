@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   split_quote_and_space.c                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 10:14:56 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/04/26 16:17:08 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/04/29 14:14:43 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -59,37 +59,30 @@ char *str_dup_minishell(char *s, int *i, int k, int j)
 	return (str);
 }
 
-void split_quote_and_space(char *str, t_all *all)
+int split_quote_and_space(char *str, t_all *all)
 {
-    t_cmds *save;
-    int i;
+	t_cmds *save;
+	int i;
 
-    i = 0;
-    while (str && str[i] && all->first && all->first->cmds)
-    {
-        if (str[i] == ' ')
-            i++;
-        else
-        {
-            all->first->cmds->token = str_dup_minishell(str, &i, i, 0);
-            if (!all->first->cmds->token)
-                return (free_all(all));
-			if (str[i + 1])
-			{
-				save = add_next_cmds(all->first->cmds);
-				if (!save)
-					return (free_all(all));
-				all->first->cmds = save;
-			}
-        }
-    }
-    
-    if (all->first && all->first->cmds)
-    {
-        while (all->first->cmds->prev)
-            all->first->cmds = all->first->cmds->prev;
-    }
-    return;
+	i = 0;
+	while (str && str[i])
+	{
+		if (str[i] == ' ')
+			i++;
+		else
+		{
+			all->first->cmds->token = str_dup_minishell(str, &i, i, 0);
+			if (!all->first->cmds->token)
+				return (1);
+			save = add_next_cmds(all->first->cmds);
+			if (!save)
+				return (1);
+			all->first->cmds = save;
+		}
+	}
+	while (all->first->cmds->prev)
+		all->first->cmds = all->first->cmds->prev;
+	return (0);
 }
 
 // int main(int ac, char **av, char **env)
