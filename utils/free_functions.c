@@ -3,21 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   free_functions.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yassinefahfouhi <yassinefahfouhi@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 11:03:13 by mazakov           #+#    #+#             */
-/*   Updated: 2025/04/29 11:45:13 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/03 16:59:31 by yassinefahf      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	free_env(t_env *env)
+void free_env(t_env *env)
 {
-	t_env	*save;
+	t_env *save;
 
 	if (!env)
-		return ;
+		return;
 	while (env->prev)
 		env = env->prev;
 	while (env)
@@ -30,12 +30,12 @@ void	free_env(t_env *env)
 	}
 }
 
-void	free_cmds(t_cmds *cmds)
+void free_cmds(t_cmds *cmds)
 {
-	t_cmds	*save;
+	t_cmds *save;
 
 	if (!cmds)
-		return ;
+		return;
 	while (cmds->prev)
 		cmds = cmds->prev;
 	while (cmds)
@@ -49,12 +49,12 @@ void	free_cmds(t_cmds *cmds)
 	}
 }
 
-void	free_data(t_data *data)
+void free_data(t_data *data)
 {
-	t_data	*save;
+	t_data *save;
 
 	if (!data)
-		return ;
+		return;
 	while (data->prev)
 		data = data->prev;
 	while (data)
@@ -65,22 +65,21 @@ void	free_data(t_data *data)
 		if (data->fd_out != 1)
 			close(data->fd_out);
 		if (data->pipe_fd[0] != -2)
-		{
 			close(data->pipe_fd[0]);
+		if (data->pipe_fd[1] != -2)
 			close(data->pipe_fd[1]);
-		}
 		save = data;
 		data = data->next;
 		free(save);
 	}
 }
 
-void	free_all(t_all *all)
+void free_all(t_all *all)
 {
 	if (!all)
-		return ;
+		return;
 	if (all->f_here_doc)
-		unlink(".here_doc.txt");
+		unlink(".tmp");
 	if (all->pids)
 		free(all->pids);
 	free_env(all->env);
@@ -89,10 +88,11 @@ void	free_all(t_all *all)
 	all = NULL;
 }
 
-void	free_new_line(t_all *all)
+void free_new_line(t_all *all)
 {
 	if (all->f_here_doc)
-		unlink(".here_doc.txt");
+		unlink(".tmp");
+	all->f_here_doc = 0;
 	free_data(all->first);
-	all->first = init_data(NONE);
+	all->first = init_data();
 }

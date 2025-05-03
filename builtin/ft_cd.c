@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   ft_cd.c                                            :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:22:20 by mazakov           #+#    #+#             */
-/*   Updated: 2025/04/30 15:14:28 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/05/02 17:57:07 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,28 +14,11 @@
 
 char	*get_pwd(char *prefix)
 {
-	size_t	size;
 	char	*pwd;
-	char	*save;
 
-	pwd = NULL;
-	save = NULL;
-	size = 0;
-	while (!pwd)
-	{
-		pwd = malloc(sizeof(char) * size);
-		if (!pwd)
-			return (NULL);
-		save = pwd;
-		pwd = getcwd(pwd, size);
-		if (!pwd)
-		{
-			free(save);
-			size++;
-		}
-		if (size > 60)
-			return (NULL);
-	}
+	pwd = getcwd(NULL, 0);
+	if (!pwd)
+		return (NULL);
 	pwd = ft_strcat(prefix, pwd, 1, 0);
 	return (pwd);
 }
@@ -75,28 +58,6 @@ int	get_home(t_env *env, char **arg)
 	return (0);
 }
 
-char	*get_pwd_from_env(t_env *env)
-{
-	char	*pwd;
-	t_env	*ptr;
-	int		i;
-
-	pwd = NULL;
-	ptr = find_in_env(env, "PWD");
-	if (!ptr)
-		return (NULL);
-	i = 0;
-	while (ptr->line && ptr->line[i] && ptr->line[i] != '=')
-		i++;
-	if (ptr->line[i] == '=')
-		i++;
-	if  (ptr->line[i])
-		pwd = ft_strdup(ptr->line + i);
-	if (!pwd)
-		return (NULL);
-	return (pwd);
-}
-
 int	ft_cd(t_env *env, char *arg)
 {
 	char	*old_pwd;
@@ -104,11 +65,9 @@ int	ft_cd(t_env *env, char *arg)
 
 	if (!arg && get_home(env, &arg))
 		return (1);
-	old_pwd = get_pwd_from_env(env);
+	old_pwd = get_pwd("OLDPWD=");
 	if (!old_pwd)
-		old_pwd = get_pwd("OLDPWD=");
-	if (!old_pwd)
-		return (2);
+		printf("getcwd : no working directory\n");
 	if (chdir(arg) == -1)
 	{
 		free(old_pwd);
@@ -116,12 +75,11 @@ int	ft_cd(t_env *env, char *arg)
 		return (1);
 	}
 	new_pwd = get_pwd("PWD=");
-	if (!new_pwd)
-	{
-		free(old_pwd);
-		return (2);
-	}
-	put_pwd(env, &new_pwd, 1);
-	put_pwd(env, &old_pwd, 2);
+	if (new_pwd)
+		put_pwd(env, &new_pwd, 1);
+	if (old_pwd)
+		put_pwd(env, &old_pwd, 2);
+	if (!old_pwd)
+		return (1);
 	return (0);
 }

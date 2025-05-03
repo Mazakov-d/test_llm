@@ -6,7 +6,7 @@
 /*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 13:14:10 by mazakov           #+#    #+#             */
-/*   Updated: 2025/04/30 15:03:02 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/05/03 20:53:08 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,12 +20,17 @@
 #include <readline/readline.h>
 #include <readline/history.h>
 #include <sys/wait.h>
+#include <stdbool.h>
 
 #define INFILE 1
 #define OUTFILE 2
 #define PIPE 3
 #define NONE 4
 #define APPEND 5
+
+# ifndef BUFFER_SIZE
+	# define BUFFER_SIZE 1000
+# endif
 
 typedef enum e_builtin
 {
@@ -117,12 +122,12 @@ int print_export(t_env *env, int i);
 int add_lst_str(t_env *prev, char *var);
 char *get_var_name(char *str);
 void modify_line(t_env *env, char *new_line);
-int ft_export(t_env *env, char *new_var);
+int ft_export(t_env *env, t_cmds *cmd);
 
 /*
 ** builtin/ft_pwd.c
 */
-int ft_pwd(t_all *all);
+int ft_pwd(void);
 
 /*
 ** builtin/ft_unset.c
@@ -167,14 +172,14 @@ char *get_path_cmd(char *cmd, char **path, t_all *all);
 */
 int setup_input_redirection(t_all *all);
 int setup_output_redirection(t_all *all);
-int setup_redirections(t_all *all);
-int reset_std_descriptors(void);
+int setup_redirections(t_all *all, int *fd_save_in, int *fd_save_out);
+int reset_std_descriptors(int *fd_save_in, int *fd_save_out);
 
 /*
 ** executing/cmd_status.c
 */
 int extract_exit_status(int wait_status);
-void wait_for_processes(t_all *all, int *pids, int cmd_count);
+void	wait_for_children(int cmd_count, pid_t *pids, int flag_child, t_all *all);
 int *init_pids_array(int cmd_count);
 
 /*
@@ -185,6 +190,11 @@ int is_digit(char c);
 int is_alphanum(char c);
 void is_in_quote(char c, int *sq, int *dq);
 int pos_in_str(char *str, char c);
+
+/*
+** parsing/redir.c
+*/
+int	check_here_doc(t_all *all, char *s);
 
 /*
 ** utils/char_utils2.c
@@ -200,6 +210,14 @@ void free_cmds(t_cmds *cmds);
 void free_data(t_data *data);
 void free_all(t_all *all);
 void free_new_line(t_all *all);
+
+/*
+** utils/get_next_line.c
+*/
+char	*get_next_line(int fd);
+char	*ft_strjoin_gnl(char const *s1, char const *s2, int index);
+void	ft_reset(char *s, int stop);
+int	ft_index_line(char *s);
 
 /*
 ** utils/strcpy.c
@@ -232,7 +250,7 @@ int is_infile(char *s);
 /*
 ** parsing/init.c
 */
-t_data *init_data(int mode);
+t_data *init_data();
 t_all *init_all(char **env);
 t_cmds *add_next_cmds(t_cmds *current);
 t_data *add_next_data(t_data *current);

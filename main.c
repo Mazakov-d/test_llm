@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   main.c                                             :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yassinefahfouhi <yassinefahfouhi@studen    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 11:08:05 by yassinefahf       #+#    #+#             */
-/*   Updated: 2025/04/29 11:51:31 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/03 16:58:21 by yassinefahf      ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,7 @@
 void new_line(t_all *all)
 {
 	free_data(all->first);
-	all->first = init_data(NONE);
+	all->first = init_data();
 	if (!all->first)
 		ft_exit(all, NULL);
 }
@@ -56,7 +56,7 @@ int parse_error(char *str, t_all *all)
 			i++;
 			while (str[i] == ' ')
 				i++;
-			if ((is_parse_err(str[i]) && !str[i + 1]) || str[i] == '\0'|| str[0] == '|')
+			if ((is_parse_err(str[i]) && !str[i + 1]) || str[i] == '\0' || str[0] == '|')
 			{
 				exit_parse(NULL, "parsing error\n", all, 258);
 				return (1);
@@ -95,8 +95,7 @@ int main(int ac, char **av, char **env)
 	all = init_all(env);
 	while (1)
 	{
-		write(1, "Schwarzenegger : ", 18);
-		line = readline(NULL);
+		line = readline("Schwarzenegger : ");
 		if (line)
 		{
 			if (!parse_error(line, all))

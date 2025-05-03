@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executing.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 15:39:57 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/04/29 15:44:15 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/03 21:13:07 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,34 +46,28 @@ int	count_cmds(t_all *all)
 	return (count);
 }
 
-void	execute_cmd(t_all *all, int *pids, int i, int cmd_count)
+void	execute_cmd(t_all *all, int i,int *flag_child)
 {
 	int	builtin;
+	int	fd_save[2];
 
-	if (setup_redirections(all))
+	if (!setup_redirections(all, &fd_save[0], &fd_save[1]))
 		ft_exit(all, NULL);
-	(void)cmd_count;
-	if (all->first->cmds->token)
+	if (all->first->cmds->token && all->first->fd_in != -1)
 	{
 		builtin = is_builtin(all->first->cmds->token);
 		if (builtin != 0)
 		{
-			// if (cmd_count == 1)
-				all->status = builtin_caller(all, builtin);
-			// else
-			// {
-			// 	pids[i] = fork();
-			// 	if (pids[i] == 0)
-			// 	{
-			// 		all->status = builtin_caller(all, builtin);
-			// 		exit(0) ;
-			// 	}
-			// }
+			*flag_child = 0;
+			all->status = builtin_caller(all, builtin);
 		}
 		else
-			pids[i] = shell_cmd(all);
+		{
+			*flag_child = 1;
+			all->pids[i] = shell_cmd(all);
+		}
 	}
-	if (reset_std_descriptors())
+	if (!reset_std_descriptors(&fd_save[0], &fd_save[1]))
 		ft_exit(all, NULL);
 }
 
@@ -82,7 +76,15 @@ void	executing(t_all *all)
 	t_data	*save;
 	int		cmd_count;
 	int		i;
+	int		flag_child;
+	// int		status;
 
+	flag_child = 0;
+	if (!all->first->cmds)
+	{
+		free_new_line(all);
+		return ;
+	}
 	save = all->first;
 	cmd_count = count_cmds(all);
 	all->pids = init_pids_array(cmd_count);
@@ -91,11 +93,20 @@ void	executing(t_all *all)
 	i = 0;
 	while (all->first)
 	{
-		execute_cmd(all, all->pids, i, cmd_count);
+		execute_cmd(all, i, &flag_child);
 		all->first = all->first->next;
 		i++;
 	}
-	wait_for_processes(all, all->pids, cmd_count);
+	wait_for_children(cmd_count, all->pids, flag_child, all);
+	// if (all->pids[cmd_count - 1] != -1)
+	// {
+	// 	waitpid(all->pids[cmd_count - 1], &status, 0);
+	// 	if (WIFEXITED(status))
+	// 		all->status = WEXITSTATUS(status);
+	// 	else
+	// 		all->status = 0;
+	// }
+	// waitpid(-1, NULL, 0);
 	all->first = save;
 	free_new_line(all);
 	if (!all->first)
