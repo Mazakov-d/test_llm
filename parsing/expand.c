@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   expand.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 13:27:45 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/05/02 19:15:00 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/12 14:28:19 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,10 +14,10 @@
 
 int	should_expand(char *line, int i, int sq)
 {
-	return (line[i] == '$' && !(sq % 2) && line[i + 1] && 
-		(is_alpha(line[i + 1]) || (line[i + 1] == '?')) && 
-		line[i + 1] != ' ' && line[i + 1] != '"' && 
-		line[i + 1] != '\'' && !is_digit(line[i + 1]));
+	return (line[i] == '$' && !(sq % 2) && line[i + 1]
+		&& (is_alpha(line[i + 1]) || (line[i + 1] == '?'))
+		&& line[i + 1] != ' ' && line[i + 1] != '"'
+		&& line[i + 1] != '\'' && !is_digit(line[i + 1]));
 }
 
 char	*expand_status(char *line, int status)
@@ -49,21 +49,29 @@ char	*expand_status(char *line, int status)
 int	find_var_end(char *line, int i, int *sq, int *dq)
 {
 	int	j;
-	int	save;
+	int	save_dq;
+	int	save_sq;
 
 	j = i;
-	save = *dq;
-	while (line[j] && line[j] != ' ' && line[j] != '\n' && !(*sq % 2))
+	save_dq = *dq;
+	save_sq = *sq;
+	while (line && line[j] && line[j] != ' ' && line[j] != '\n'
+		&& !(*sq % 2) && line[j] != '=')
 	{
+		if (line[j + 1] && (line[j + 1] == '\''
+				|| line[j + 1] == '"' || line[j + 1] == '='))
+			break ;
+		if (j != i && line[j + 1] && line[j + 1] == '$')
+			break ;
 		is_in_quote(line[j], sq, dq);
-		if (*dq != save)
-			break;
+		if (*dq != save_dq || *sq != save_sq)
+			break ;
 		j++;
 	}
 	return (j);
 }
 
-char *search_var_in_env(char *line, char *var, int end_var, t_all *all)
+char	*search_var_in_env(char *line, char *var, int end_var, t_all *all)
 {
 	t_env	*ptr;
 	char	*var_name;
@@ -87,11 +95,15 @@ char *search_var_in_env(char *line, char *var, int end_var, t_all *all)
 	return (expanded_line);
 }
 
-char	*expand_var(char *line, t_all *all, int i, int j)
+char	*expand_var(char *line, t_all *all)
 {
 	int	sq;
 	int	dq;
+	int	i;
+	int	j;
 
+	i = 0;
+	j = 0;
 	dq = 0;
 	sq = 0;
 	while (line && line[i])
@@ -100,9 +112,12 @@ char	*expand_var(char *line, t_all *all, int i, int j)
 		if (should_expand(line, i, sq))
 		{
 			j = find_var_end(line, i, &sq, &dq);
-			line = search_var_in_env(line, line + i, (j - i - 1), all);
+			line = search_var_in_env(line, line + i, (j - i), all);
 			if (!line)
 				return (NULL);
+			i = -1;
+			sq = 0;
+			dq = 0;
 		}
 		i++;
 	}

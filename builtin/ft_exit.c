@@ -3,14 +3,14 @@
 /*                                                        :::      ::::::::   */
 /*   ft_exit.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/14 15:19:27 by mazakov           #+#    #+#             */
-/*   Updated: 2025/04/19 16:02:37 by mazakov          ###   ########.fr       */
+/*   Updated: 2025/05/13 15:22:27 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../minishell.h"
+#include "../minishell.h"
 
 int	ft_atoi(char *str)
 {
@@ -38,33 +38,45 @@ int	ft_atoi(char *str)
 	return (nb * flag);
 }
 
+void	loop_exit(t_all *all, char *cmd, int *i)
+{
+	if (*i == 0 && cmd[*i] == '-')
+		*i = *i + 1;
+	if (!is_digit(cmd[*i]))
+	{
+		put_str_function("exit", cmd, "numeric argument required", 2);
+		put_str_fd("exit\n", 2);
+		free_all(all); 
+		exit(2);
+	}
+	*i = *i + 1;
+}
+
 void	ft_exit(t_all *all, t_cmds *cmd)
 {
 	int	i;
 
 	i = 0;
-	if (!cmd || !cmd->next)
+	if (!cmd || !cmd->next || !cmd->next->token)
 	{
-		printf("exit\n");
+		put_str_fd("exit\n", 2);
 		free_all(all);
 		exit(0);
 	}
 	cmd = cmd->next;
 	while (cmd && cmd->token && cmd->token[i])
 	{
-		if (i == 0 && cmd->token[i] == '-')
-			i++;
-		if (!is_digit(cmd->token[i]))
-		{
-			free_all(all);
-			printf("exit\n");
-			printf("exit : %s : numeric argument required\n", cmd->token);
-			exit(2);
-		}
-		i++;
+		loop_exit(all, cmd->token, &i);
 	}
-	free_all(all);
-	exit(ft_atoi(cmd->token) % 256);
+	if (!cmd->token[i] && cmd->next && cmd->next->token)
+		put_str_error("exit", "too many arguments", 2);
+	else
+	{
+		i = ft_atoi(cmd->token);
+		put_str_fd("exit\n", 2);
+		free_all(all);
+		exit(i % 256);
+	}
 }
 
 // int main()

@@ -3,21 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   free_functions.c                                   :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: yassinefahfouhi <yassinefahfouhi@studen    +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 11:03:13 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/03 16:59:31 by yassinefahf      ###   ########.fr       */
+/*   Updated: 2025/05/13 17:46:09 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void free_env(t_env *env)
+void	free_env(t_env *env, t_all *all)
 {
-	t_env *save;
+	t_env	*save;
 
 	if (!env)
-		return;
+		return ;
 	while (env->prev)
 		env = env->prev;
 	while (env)
@@ -28,14 +28,15 @@ void free_env(t_env *env)
 		env = env->next;
 		free(save);
 	}
+	all->env = NULL;
 }
 
-void free_cmds(t_cmds *cmds)
+void	free_cmds(t_cmds *cmds, t_data *data)
 {
-	t_cmds *save;
+	t_cmds	*save;
 
 	if (!cmds)
-		return;
+		return ;
 	while (cmds->prev)
 		cmds = cmds->prev;
 	while (cmds)
@@ -47,22 +48,23 @@ void free_cmds(t_cmds *cmds)
 		if (save)
 			free(save);
 	}
+	data->cmds = NULL;
 }
 
-void free_data(t_data *data)
+void	free_data(t_data *data, t_all *all)
 {
-	t_data *save;
+	t_data	*save;
 
-	if (!data)
-		return;
+	if (!data && !data->next)
+		return ;
 	while (data->prev)
 		data = data->prev;
 	while (data)
 	{
-		free_cmds(data->cmds);
-		if (data->fd_in != 0)
+		free_cmds(data->cmds, data);
+		if (data->fd_in > 0)
 			close(data->fd_in);
-		if (data->fd_out != 1)
+		if (data->fd_out > 1)
 			close(data->fd_out);
 		if (data->pipe_fd[0] != -2)
 			close(data->pipe_fd[0]);
@@ -72,27 +74,36 @@ void free_data(t_data *data)
 		data = data->next;
 		free(save);
 	}
+	all->first = NULL;
 }
 
-void free_all(t_all *all)
+void	free_all(t_all *all)
 {
 	if (!all)
-		return;
+		return ;
+	rl_clear_history();
 	if (all->f_here_doc)
 		unlink(".tmp");
 	if (all->pids)
 		free(all->pids);
-	free_env(all->env);
-	free_data(all->first);
+	close_init_fd(&all->fd_save[0], &all->fd_save[1]);
+	free_env(all->env, all);
+	free_data(all->first, all);
 	free(all);
 	all = NULL;
 }
 
-void free_new_line(t_all *all)
+void	free_new_line(t_all *all)
 {
+	all->g_pid = 0;
 	if (all->f_here_doc)
 		unlink(".tmp");
+	if (all->pids)
+		free(all->pids);
+	all->pids = NULL;
 	all->f_here_doc = 0;
-	free_data(all->first);
+	close_init_fd(&all->fd_save[0], &all->fd_save[1]);
+	if (all->first)
+		free_data(all->first, all);
 	all->first = init_data();
 }

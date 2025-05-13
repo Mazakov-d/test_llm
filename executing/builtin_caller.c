@@ -6,11 +6,11 @@
 /*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 16:16:05 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/05/02 18:06:55 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/13 14:20:37 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-# include "../minishell.h"
+#include "../minishell.h"
 
 int	caller_next(t_all *all, int builtin)
 {
@@ -29,6 +29,8 @@ int	caller_next(t_all *all, int builtin)
 		while (all->first->cmds)
 		{
 			rtn = ft_export(all->env, all->first->cmds);
+			if (rtn == 2)
+				ft_exit(all, NULL);
 			if (!all->first->cmds->next || !all->first->cmds->next->token)
 				break ;
 			all->first->cmds = all->first->cmds->next;
@@ -42,7 +44,7 @@ int	caller_next(t_all *all, int builtin)
 int	builtin_caller(t_all *all, int builtin)
 {
 	if (builtin == EXIT)
-		ft_exit(all, all->first->cmds->next);
+		ft_exit(all, all->first->cmds);
 	else if (builtin == ECHO)
 		ft_echo(all->first->cmds->next);
 	else if (builtin == UNSET)

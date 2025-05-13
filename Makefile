@@ -16,13 +16,14 @@ HEADERS		= minishell.h
 
 # Source files
 BUILTIN_SRC	= env_functions.c env_parsing.c ft_cd.c ft_echo.c ft_env.c \
-			  ft_export.c ft_pwd.c ft_unset.c ft_exit.c
+			  export_utils.c ft_export.c ft_pwd.c ft_unset.c ft_exit.c
 
-UTILS_SRC	= char.c char_utils2.c free_functions.c ft_calloc.c \
+UTILS_SRC	= char.c char_utils2.c free_functions.c ft_calloc.c ft_put_str.c\
 			  ft_itoa.c strcpy.c get_next_line.c get_next_line_utils.c
 
 PARSING_SRC	= expand.c expand_null.c expand_var.c init.c split_quote_and_space.c \
-			  split_pipe.c add_space.c handle_line.c redir.c
+			  split_pipe.c add_space.c handle_line.c handle_line_utils.c redir.c redir_utils.c \
+              handle_input.c
 
 EXEC_SRC	= builtin_caller.c executing.c shell_cmd.c get_path.c check_cmd.c \
 			  fd_management.c cmd_status.c
@@ -36,12 +37,17 @@ SRC			= main.c \
 # Object files
 OBJ			= $(addprefix $(OBJ_DIR)/, $(SRC:.c=.o))
 
+# Colors for terminal output
+GREEN		= \033[32m
+YELLOW		= \033[33m
+RESET		= \033[0m
+
 # Rules
 all: $(NAME)
 
 $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) $(RL_FLAGS) -o $(NAME)
-	@echo "\033[32mCompilation complete. Executable '$(NAME)' created.\033[0m"
+	@echo "$(GREEN)Compilation complete. Executable '$(NAME)' created.$(RESET)"
 
 # This pattern rule ensures source files are recompiled if headers or Makefile change
 $(OBJ_DIR)/%.o: %.c $(HEADERS) Makefile
@@ -50,11 +56,11 @@ $(OBJ_DIR)/%.o: %.c $(HEADERS) Makefile
 
 clean:
 	@rm -rf $(OBJ_DIR)
-	@echo "\033[33mObject files removed.\033[0m"
+	@echo "$(YELLOW)Object files removed.$(RESET)"
 
 fclean: clean
 	@rm -f $(NAME)
-	@echo "\033[33mExecutable '$(NAME)' removed.\033[0m"
+	@echo "$(YELLOW)Executable '$(NAME)' removed.$(RESET)"
 
 re: fclean all
 

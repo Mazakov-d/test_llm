@@ -3,18 +3,28 @@
 /*                                                        :::      ::::::::   */
 /*   ft_itoa.c                                          :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dorianmazari <dorianmazari@student.42.f    +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 13:40:32 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/04/12 15:35:06 by dorianmazar      ###   ########.fr       */
+/*   Updated: 2025/05/13 18:23:55 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int len_nb(int nb)
+int	ft_strncmp(const char *s1, const char *s2, int n)
 {
-	int count;
+	int	i ;
+
+	i = 0;
+	while (s1 && s2 && s1[i] == s2[i] && i < n)
+		i++;
+	return (s2[i] - s1[i]);
+}
+
+int	len_nb(int nb)
+{
+	int	count;
 
 	count = 0;
 	if (nb == 0)
@@ -32,10 +42,10 @@ int len_nb(int nb)
 	return (count);
 }
 
-char *ft_itoa(int nb)
+char	*ft_itoa(int nb)
 {
-	char *nbr;
-	int len;
+	char	*nbr;
+	int		len;
 
 	len = len_nb(nb);
 	nbr = malloc(sizeof(char) * (len + 1));
@@ -49,11 +59,3 @@ char *ft_itoa(int nb)
 	}
 	return (nbr);
 }
-
-// int main()
-// {
-// 	char *dest;
-// 	dest = ft_itoa(2500);
-// 	// printf("len: %d\n", len_nb(255));
-// 	printf("itoa: %s\n", dest);
-// }

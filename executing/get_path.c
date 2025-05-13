@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_path.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dorianmazari <dorianmazari@student.42.f    +#+  +:+       +#+        */
+/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 13:55:37 by mazakov           #+#    #+#             */
-/*   Updated: 2025/04/15 15:25:21 by dorianmazar      ###   ########.fr       */
+/*   Updated: 2025/05/13 17:36:25 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ char	*str_dup_c(char *str, char c_limit, char c_join)
 	i = 0;
 	while (str[i] && str[i] != c_limit)
 		i++;
-	new_str = malloc(sizeof(char) * i + 2);
+	new_str = malloc(sizeof(char) * (i + 2));
 	if (!new_str)
 		return (NULL);
 	i = 0;
@@ -60,8 +60,9 @@ int	find_path_string(t_env **env)
 	save = *env;
 	while (*env && (*env)->line)
 	{
-		if ((*env)->line[0] == 'P' && (*env)->line[1] == 'A' && (*env)->line[2] == 'T'
-		&& (*env)->line[3] == 'H' && (*env)->line[4] == '=')
+		if ((*env)->line[0] == 'P' && (*env)->line[1] == 'A'
+			&& (*env)->line[2] == 'T' && (*env)->line[3] == 'H'
+			&& (*env)->line[4] == '=')
 			return (0);
 		(*env) = (*env)->next;
 	}
@@ -97,16 +98,19 @@ char	**split_c(char	*str, char c_limit, char c_join)
 	return (strs);
 }
 
-char	**get_path_env(t_env *env)
+int	get_path_env(t_env *env, char ***path)
 {
 	int		i;
-	char	**path;
 
 	i = find_path_string(&env);
 	if (i == -1)
-		return (NULL);
-	path = split_c(env->line + 5, ':', '/');
-	if (!path)
-		return (NULL);
-	return (path);
+		return (0);
+	*path = split_c(env->line + 5, ':', '/');
+	if (!*path)
+	{
+		put_str_fd("here", 2);
+		*path = NULL;
+		return (1);
+	}
+	return (0);
 }

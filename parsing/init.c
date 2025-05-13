@@ -6,15 +6,15 @@
 /*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 15:27:43 by yassinefahf       #+#    #+#             */
-/*   Updated: 2025/05/02 19:40:37 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/13 17:46:40 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-t_data *init_data()
+t_data	*init_data(void)
 {
-	t_data *data;
+	t_data	*data;
 
 	data = ft_calloc(1, sizeof(struct s_data));
 	if (!data)
@@ -36,35 +36,36 @@ t_data *init_data()
 	return (data);
 }
 
-t_all *init_all(char **env)
+t_all	*init_all(char **env)
 {
-	t_all *all;
+	t_all	*all;
 
 	all = ft_calloc(1, sizeof(struct s_all));
 	if (!all)
-		return (NULL);
+		exit(1);
 	all->first = init_data();
-	// all->first->next = NULL;
 	if (!all->first)
 	{
 		free(all);
-		return (NULL);
+		exit(1);
 	}
 	all->status = 0;
 	all->env = env_to_struct(env);
 	if (!all->env)
 	{
-		free_data(all->first);
+		free_data(all->first, all);
 		free(all);
-		return (NULL);
+		exit(1);
 	}
+	all->fd_save[0] = -1;
+	all->fd_save[1] = -1;
 	all->pids = NULL;
 	return (all);
 }
 
-t_cmds *add_next_cmds(t_cmds *current)
+t_cmds	*add_next_cmds(t_cmds *current)
 {
-	t_cmds *new;
+	t_cmds	*new;
 
 	new = NULL;
 	new = ft_calloc(1, sizeof(struct s_cmds));
@@ -76,31 +77,29 @@ t_cmds *add_next_cmds(t_cmds *current)
 	return (new);
 }
 
-t_data *add_next_data(t_data *current)
+t_data	*add_next_data(t_data *current)
 {
-	t_data *new;
+	t_data	*new;
 
 	new = NULL;
-	// new = ft_calloc(1, sizeof(t_data));
 	new = init_data();
 	if (!new)
 		return (NULL);
 	current->next = new;
 	new->prev = current;
 	new->next = NULL;
-	// printf("current: %s\n", new->prev->cmds->next->token);
 	return (new);
 }
 
-t_cmds *remove_cmd(t_cmds *current)
+void	remove_cmd(t_cmds **current)
 {
-	t_cmds *next;
-	t_cmds *prev;
+	t_cmds	*next;
+	t_cmds	*prev;
 
-	if (!current)
-		return (NULL);
-	prev = current->prev;
-	next = current->next;
+	if (!(*current))
+		return ;
+	prev = (*current)->prev;
+	next = (*current)->next;
 	if (prev)
 		prev->next = next;
 	else if (next)
@@ -109,22 +108,16 @@ t_cmds *remove_cmd(t_cmds *current)
 		next->prev = prev;
 	else if (prev)
 		prev->next = NULL;
-	if (current && current->token)
+	if ((*current))
 	{
-		free(current->token);
-		free(current);
+		if ((*current)->token)
+			free((*current)->token);
+		free((*current));
 	}
-	if (next->token)
-	{
-		// printf("Here next %s\n", next->token);
-		current = next;
-	}
+	if (prev && prev->token)
+		(*current) = prev;
 	else
-	{
-		// printf("Here prev %s\n", prev->token);
-		current = prev;
-	}
-	return (current);
+		(*current) = next;
 }
 
 // int main(int ac, char **av, char **env)

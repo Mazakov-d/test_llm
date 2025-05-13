@@ -3,22 +3,22 @@
 /*                                                        :::      ::::::::   */
 /*   ft_pwd.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:31:50 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/02 17:57:34 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/12 14:23:20 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-int	ft_pwd()
+int	ft_pwd(void)
 {
 	char	*pwd;
 
 	pwd = getcwd(NULL, 0);
 	if (!pwd)
-		printf("getcwd : no working directory\n");
+		put_str_fd("getcwd : no working directory\n", 2);
 	else
 		printf("%s\n", pwd);
 	if (!pwd)
