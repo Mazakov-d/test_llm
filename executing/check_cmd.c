@@ -3,43 +3,39 @@
 /*                                                        :::      ::::::::   */
 /*   check_cmd.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 13:52:41 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/13 18:23:01 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 23:59:28 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-char	*check_file_permission(char *cmd, char *path_cmd, t_all *all)
+int    ft_strchr(const char *s, int c)
 {
-	struct stat	statbuf;
+    int    i;
 
-	if (lstat(path_cmd, &statbuf) == 0)
-	{
-		if (S_ISREG(statbuf.st_mode))
-		{
-			if (statbuf.st_mode & S_IXUSR)
-				return (path_cmd);
-			else
-				return (handle_exec_error(cmd, path_cmd, all, 0));
-		}
-		else
-			return (handle_exec_error(cmd, path_cmd, all, 1));
-	}
-	free(path_cmd);
-	return (NULL);
+    i = 0;
+    if (!s)
+        return (0);
+        
+    while (s[i])
+    {
+        if (s[i] == (char)c)
+            return (1);
+        i++;
+    }
+    return (0);
 }
 
-char	*handle_not_found(char *cmd, char **path, t_all *all)
+char	*handle_not_found(char *cmd, t_all *all)
 {
-	if (path)
-		free_strs(path);
-	if (ft_strcmp(cmd, "./") == 1)
+	if (ft_strcmp(cmd, "/") == 2)
 		put_str_error(cmd, "No such file or directory", 2);
 	else
 		put_str_error(cmd, "command not found", 2);
+	
 	all->status = 127;
 	return (NULL);
 }
@@ -50,15 +46,14 @@ int	index_path_cmd(char *cmd, char **path)
 	char	*path_cmd;
 
 	i = 0;
-	if (!cmd || !path)
+	if (!cmd || !path || ft_strcmp(cmd, "/") == 2)
 		return (-1);
-	if (ft_strcmp(cmd, "./") == 1)
-		return (-1);
+		
 	while (path[i])
 	{
 		path_cmd = ft_strcat(path[i], cmd, 0, 0);
 		if (!path_cmd)
-			return (-2);
+			return (-1);
 		if (access(path_cmd, F_OK | X_OK) == 0)
 		{
 			free(path_cmd);
@@ -70,10 +65,11 @@ int	index_path_cmd(char *cmd, char **path)
 	return (-1);
 }
 
-int	check_local(char *cmd, char **path_cmd)
+int    check_local(char *cmd, char **path_cmd)
 {
-	char	*pwd;
-	char	*tmp;
+	char		*pwd;
+	char		*tmp;
+	struct stat	statbuf;
 
 	pwd = get_pwd(NULL);
 	if (!pwd)
@@ -90,38 +86,136 @@ int	check_local(char *cmd, char **path_cmd)
 	if (!*path_cmd)
 		return (0);
 	if (access(*path_cmd, F_OK) == 0)
-		return (1);
+	{
+		if (lstat(*path_cmd, &statbuf) == 0 && !S_ISDIR(statbuf.st_mode))
+			return (1);
+	}
 	free(*path_cmd);
 	*path_cmd = NULL;
 	return (0);
 }
+/* From check_cmd.c */
 
-char	*get_path_cmd(char *cmd, char **path, t_all *all, int *flag)
+char    *check_file_permission(char *cmd, char *path_cmd, t_all *all)
 {
-	char	*path_cmd;
+    struct stat    statbuf;
 
-	path_cmd = NULL;
-	if (!cmd)
-		return (NULL);
-	if (check_local(cmd, &path_cmd))
-		return (check_file_permission(cmd, path_cmd, all));
-	if (path_cmd)
-		free(path_cmd);
-	if (!path)
-	{
-		put_str_fd("Error: PATH not defined\n", 2);
-		all->status = 127;
-		return (NULL);
-	}
-	*flag = index_path_cmd(cmd, path);
-	if (*flag < 0)
-		return (handle_not_found(cmd, path, all));
-	path_cmd = ft_strcat(path[*flag], cmd, 0, 0);
-	free_strs(path);
-	if (!path_cmd)
-	{
-		*flag = -2;
-		return (NULL);
-	}
-	return (check_file_permission(cmd, path_cmd, all));
+    if (lstat(path_cmd, &statbuf) == 0)
+    {
+        if (S_ISDIR(statbuf.st_mode))
+        {
+            put_str_error(cmd, "Is a directory", 2);
+            all->status = 126;
+            free(path_cmd);
+            return (NULL);
+        }
+        
+        if (!S_ISREG(statbuf.st_mode))
+        {
+            free(path_cmd);
+            return (NULL);
+        }
+        
+        if (access(path_cmd, X_OK) != 0)
+        {
+            put_str_error(cmd, "Permission denied", 2);
+            all->status = 126;
+            free(path_cmd);
+            return (NULL);
+        }
+        
+        return (path_cmd);
+    }
+    
+    free(path_cmd);
+    return (NULL);
 }
+
+char    *get_path_cmd(char *cmd, char **path, t_all *all)
+{
+    int            i;
+    char        *path_cmd;
+    struct stat    statbuf;
+
+    if (!cmd || cmd[0] == '\0')
+        return (NULL);
+    
+    /* If command includes path indicators like ./ or / */
+    if (ft_strchr(cmd, '/'))
+    {
+        if (access(cmd, F_OK) != 0)
+        {
+            put_str_error(cmd, "No such file or directory", 2);
+            all->status = 127;
+            return (NULL);
+        }
+        
+        if (lstat(cmd, &statbuf) == 0)
+        {
+            if (S_ISDIR(statbuf.st_mode))
+            {
+                put_str_error(cmd, "Is a directory", 2);
+                all->status = 126;
+                return (NULL);
+            }
+        }
+        
+        if (access(cmd, X_OK) != 0)
+        {
+            put_str_error(cmd, "Permission denied", 2);
+            all->status = 126;
+            return (NULL);
+        }
+        
+        return (ft_strdup(cmd));
+    }
+    
+    /* Command has no path indicators, search in PATH */
+    if (!path)
+    {
+        put_str_error(cmd, "command not found", 2);
+        all->status = 127;
+        return (NULL);
+    }
+    
+    i = 0;
+    while (path[i])
+    {
+        path_cmd = ft_strcat(path[i], cmd, 0, 0);
+        if (!path_cmd)
+            return (NULL);
+        
+        if (access(path_cmd, F_OK) == 0)
+        {
+            if (lstat(path_cmd, &statbuf) == 0)
+            {
+                if (S_ISDIR(statbuf.st_mode))
+                {
+                    free(path_cmd);
+                    i++;
+                    continue;
+                }
+                
+                if (access(path_cmd, X_OK) == 0)
+                    return (path_cmd);
+                else
+                {
+                    free(path_cmd);
+                    i++;
+                    continue;
+                }
+            }
+        }
+        
+        free(path_cmd);
+        i++;
+    }
+    
+    put_str_error(cmd, "command not found", 2);
+    all->status = 127;
+    return (NULL);
+}
+
+/* New helper function */
+
+

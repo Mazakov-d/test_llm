@@ -3,22 +3,27 @@
 /*                                                        :::      ::::::::   */
 /*   cmd_status.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 18:10:31 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/05/13 18:23:55 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 23:49:03 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-char	*handle_exec_error(char *cmd, char *path_cmd, t_all *all, int is_dir)
+char	*handle_exec_error(char *cmd, char *path_cmd, t_all *all, int type)
 {
-	if (is_dir)
+	if (type == 0)
+	{
+		put_str_error(cmd, "Permission denied", 2);
+		all->status = 126;
+	}
+	else if (type == 1)
+	{
 		put_str_error(cmd, "Is a directory", 2);
-	else
-		put_str_error(cmd, "permission denied", 2);
-	all->status = 126;
+		all->status = 126;
+	}
 	free(path_cmd);
 	return (NULL);
 }

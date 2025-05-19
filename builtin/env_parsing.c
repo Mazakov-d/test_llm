@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   env_parsing.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:20:53 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/13 18:23:55 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 23:04:06 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	*free_new_env(t_env *env)
 	save = NULL;
 	while (env->prev)
 		env = env->prev;
-	while (env)
+	while (env && env->next)
 	{
 		save = env;
 		if (env->line)
@@ -28,6 +28,7 @@ void	*free_new_env(t_env *env)
 		if (save)
 			free(save);
 	}
+	free(env);
 	return (NULL);
 }
 
@@ -70,12 +71,9 @@ t_env	*env_to_struct(char **env)
 	char	*line;
 	int		i;
 
-	new_env = malloc(sizeof(t_env));
+	new_env = ft_calloc(sizeof(t_env), 1);
 	if (!new_env)
 		return (NULL);
-	new_env->prev = NULL;
-	new_env->next = NULL;
-	new_env->line = NULL;
 	save = new_env;
 	i = 0;
 	while (env && env[i])

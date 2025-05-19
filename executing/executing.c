@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   executing.c                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/12 15:39:57 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/05/13 15:35:33 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 22:38:29 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -71,28 +71,23 @@ void	execute_cmd(t_all *all, int *pids, int i)
 	if (!all->first || !all->first->cmds || !all->first->cmds->token)
 	{
 		all->status = 0;
+		if (g_stop != 0)
+			all->status = 130;
 		return ;
 	}
 	if (!setup_redirections(all, &all->fd_save[0], &all->fd_save[1]))
 		ft_exit(all, NULL);
-	if (all->first->cmds->token && all->first->fd_in != -1)
+	if (all->first->fd_in == -1 || all->first->fd_out == -1)
+		all->status = 1;
+	else if (all->first->cmds->token)
 	{
 		builtin = is_builtin(all->first->cmds->token);
 		if (builtin != 0 && !all->first->next && !all->first->prev)
-		{
-			all->g_pid = 0;
 			all->status = builtin_caller(all, builtin);
-		}
 		else if (builtin != 0)
-		{
-			all->g_pid = pids[i];
 			pids[i] = builtin_child(all, builtin);
-		}
 		else
-		{
-			all->g_pid = pids[i];
 			pids[i] = shell_cmd(all);
-		}
 	}
 	if (!reset_std_descriptors(&all->fd_save[0], &all->fd_save[1]))
 		ft_exit(all, NULL);

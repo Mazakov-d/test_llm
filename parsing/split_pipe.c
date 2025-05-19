@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   split_pipe.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: yafahfou <yafahfou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 13:45:18 by yassinefahf       #+#    #+#             */
-/*   Updated: 2025/05/13 18:23:55 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/17 15:31:53 by yafahfou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -105,18 +105,3 @@ char	**split_pipe(char const *s, char *delim)
 	res[nb_words] = NULL;
 	return (res);
 }
-
-// int main()
-// {
-// 	char *s = "ls>a | echo\"|\"";
-// 	int i = 0;
-// 	char **split;
-
-// 	split = split_pipe(s, "|");
-// 	while (s[i])
-// 	{
-// 		printf("mysplit: %s\n", split[i]);
-// 		i++;
-// 	}
-// 	return (0);
-// }

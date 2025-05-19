@@ -6,7 +6,7 @@
 /*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 15:27:43 by yassinefahf       #+#    #+#             */
-/*   Updated: 2025/05/13 17:46:40 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 15:06:01 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,7 +53,7 @@ t_all	*init_all(char **env)
 	all->env = env_to_struct(env);
 	if (!all->env)
 	{
-		free_data(all->first, all);
+		free_data(all->first);
 		free(all);
 		exit(1);
 	}
@@ -91,15 +91,15 @@ t_data	*add_next_data(t_data *current)
 	return (new);
 }
 
-void	remove_cmd(t_cmds **current)
+t_cmds	*remove_cmd(t_cmds *current)
 {
 	t_cmds	*next;
 	t_cmds	*prev;
 
-	if (!(*current))
-		return ;
-	prev = (*current)->prev;
-	next = (*current)->next;
+	if (!current)
+		return (NULL);
+	prev = current->prev;
+	next = current->next;
 	if (prev)
 		prev->next = next;
 	else if (next)
@@ -108,16 +108,16 @@ void	remove_cmd(t_cmds **current)
 		next->prev = prev;
 	else if (prev)
 		prev->next = NULL;
-	if ((*current))
+	if (current && current->token)
 	{
-		if ((*current)->token)
-			free((*current)->token);
-		free((*current));
+		free(current->token);
+		free(current);
 	}
-	if (prev && prev->token)
-		(*current) = prev;
+	if (next && next->token)
+		current = next;
 	else
-		(*current) = next;
+		current = prev;
+	return (current);
 }
 
 // int main(int ac, char **av, char **env)
@@ -134,7 +134,7 @@ void	remove_cmd(t_cmds **current)
 // 		tmp = all->first->cmds;
 // 		tmp->token = ft_strdup("ls");
 // 		printf("cmds: %s\n", tmp->token);
-// 		tmp = add_next_cmds(tmp);
+// 		tmp = add_prev_cmds(tmp);
 // 		tmp->token = ft_strdup(">");
 // 		printf("cmds: %s\n", tmp->token);
 // 		tmp = add_next_cmds(tmp);

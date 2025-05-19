@@ -6,7 +6,7 @@
 /*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/10 10:14:56 by dorianmazar       #+#    #+#             */
-/*   Updated: 2025/05/13 18:23:55 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 16:34:12 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -47,7 +47,7 @@ char	*str_dup_minishell(char *s, int *i, int k, int j)
 		is_in_quote(s[k], &sq, &dq);
 		if ((s[k] == ' ') && !(sq % 2) && !(dq % 2))
 			break ;
-		else if (s[k] == '$' && !is_alpha(s[k + 1]) && (!(sq % 2) && !(dq % 2)))
+		if (s[k] == '$' && s[k + 1] && s[k + 1] != ' ' && !is_alpha(s[k + 1]) && (!((sq + dq) % 2) && !(dq % 2)))
 			k += 2;
 		else if ((s[k] == '\'' && ((sq % 2) || (!(dq % 2))))
 			|| (s[k] == '\"' && ((dq % 2) || (!(sq % 2)))))

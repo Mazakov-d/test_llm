@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   get_path.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 13:55:37 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/13 17:36:25 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 22:23:48 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,7 @@ char	*str_dup_c(char *str, char c_limit, char c_join)
 	i = 0;
 	while (str[i] && str[i] != c_limit)
 		i++;
-	new_str = malloc(sizeof(char) * (i + 2));
+	new_str = malloc(sizeof(char) * i + 2);
 	if (!new_str)
 		return (NULL);
 	i = 0;
@@ -98,19 +98,16 @@ char	**split_c(char	*str, char c_limit, char c_join)
 	return (strs);
 }
 
-int	get_path_env(t_env *env, char ***path)
+char	**get_path_env(t_env *env, t_all *all)
 {
 	int		i;
+	char	**path;
 
 	i = find_path_string(&env);
 	if (i == -1)
-		return (0);
-	*path = split_c(env->line + 5, ':', '/');
-	if (!*path)
-	{
-		put_str_fd("here", 2);
-		*path = NULL;
-		return (1);
-	}
-	return (0);
+		return (NULL);
+	path = split_c(env->line + 5, ':', '/');
+	if (!path)
+		ft_exit(all, NULL);
+	return (path);
 }

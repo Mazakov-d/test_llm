@@ -3,16 +3,16 @@
 /*                                                        :::      ::::::::   */
 /*   ft_unset.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dorianmazari <dorianmazari@student.42.f    +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 13:36:50 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/05 10:39:14 by dorianmazar      ###   ########.fr       */
+/*   Updated: 2025/05/19 23:21:34 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	remove_node(t_env *node)
+t_env	*remove_node(t_env *node)
 {
 	t_env	*prev;
 	t_env	*next;
@@ -21,13 +21,20 @@ void	remove_node(t_env *node)
 	{
 		prev = node->prev;
 		next = node->next;
-		prev->next = next;
+		if (prev)
+			prev->next = next;
 		if (next)
 			next->prev = prev;
 		if (node->line)
 			free(node->line);
 		free(node);
+		if (prev)
+			return (prev);
+		if (next)
+			return (next);
+		return (NULL);
 	}
+	return (NULL);
 }
 
 int	ft_unset(t_env *env, t_cmds *cmd)
@@ -43,7 +50,7 @@ int	ft_unset(t_env *env, t_cmds *cmd)
 		{
 			save = find_in_env(env, cmd->token);
 			if (save)
-				remove_node(save);
+				env = remove_node(save);
 			cmd = cmd->next;
 		}
 		cmd = ptr;

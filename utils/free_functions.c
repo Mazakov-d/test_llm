@@ -6,13 +6,13 @@
 /*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/09 11:03:13 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/13 17:46:09 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 13:13:30 by dmazari          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../minishell.h"
 
-void	free_env(t_env *env, t_all *all)
+void	free_env(t_env *env)
 {
 	t_env	*save;
 
@@ -28,10 +28,9 @@ void	free_env(t_env *env, t_all *all)
 		env = env->next;
 		free(save);
 	}
-	all->env = NULL;
 }
 
-void	free_cmds(t_cmds *cmds, t_data *data)
+void	free_cmds(t_cmds *cmds)
 {
 	t_cmds	*save;
 
@@ -48,10 +47,9 @@ void	free_cmds(t_cmds *cmds, t_data *data)
 		if (save)
 			free(save);
 	}
-	data->cmds = NULL;
 }
 
-void	free_data(t_data *data, t_all *all)
+void	free_data(t_data *data)
 {
 	t_data	*save;
 
@@ -61,7 +59,7 @@ void	free_data(t_data *data, t_all *all)
 		data = data->prev;
 	while (data)
 	{
-		free_cmds(data->cmds, data);
+		free_cmds(data->cmds);
 		if (data->fd_in > 0)
 			close(data->fd_in);
 		if (data->fd_out > 1)
@@ -74,7 +72,6 @@ void	free_data(t_data *data, t_all *all)
 		data = data->next;
 		free(save);
 	}
-	all->first = NULL;
 }
 
 void	free_all(t_all *all)
@@ -86,16 +83,17 @@ void	free_all(t_all *all)
 		unlink(".tmp");
 	if (all->pids)
 		free(all->pids);
+	all->pids = NULL;
 	close_init_fd(&all->fd_save[0], &all->fd_save[1]);
-	free_env(all->env, all);
-	free_data(all->first, all);
-	free(all);
+	free_env(all->env);
+	free_data(all->first);
+	if (all)
+		free(all);
 	all = NULL;
 }
 
 void	free_new_line(t_all *all)
 {
-	all->g_pid = 0;
 	if (all->f_here_doc)
 		unlink(".tmp");
 	if (all->pids)
@@ -104,6 +102,6 @@ void	free_new_line(t_all *all)
 	all->f_here_doc = 0;
 	close_init_fd(&all->fd_save[0], &all->fd_save[1]);
 	if (all->first)
-		free_data(all->first, all);
+		free_data(all->first);
 	all->first = init_data();
 }

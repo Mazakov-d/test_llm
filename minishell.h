@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   minishell.h                                        :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: dmazari <dmazari@student.42.fr>            +#+  +:+       +#+        */
+/*   By: mazakov <mazakov@student.42.fr>            +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/06 13:50:29 by mazakov           #+#    #+#             */
-/*   Updated: 2025/05/13 18:24:04 by dmazari          ###   ########.fr       */
+/*   Updated: 2025/05/19 22:42:50 by mazakov          ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,6 +24,7 @@
 # include <signal.h>
 # include <sys/stat.h>
 
+# define HERE_DOC 0
 # define INFILE 1
 # define OUTFILE 2
 # define PIPE 3
@@ -75,10 +76,7 @@ typedef struct s_all
 	int				fd_save[2];
 	int				f_here_doc;
 	int				status;
-	int				g_pid;
 }	t_all;
-
-
 /*
 ** main.c
 */
@@ -130,7 +128,7 @@ void	ft_env(t_env *env);
 ** builtin/ft_exit.c
 */
 int		ft_atoi(char *str);
-void	ft_exit(t_all *all, t_cmds *cmd);
+int		ft_exit(t_all *all, t_cmds *cmd);
 
 /*
 ** builtin/ft_export.c
@@ -146,7 +144,7 @@ int		ft_pwd(void);
 /*
 ** builtin/ft_unset.c
 */
-void	remove_node(t_env *node);
+t_env	*remove_node(t_env *node);
 int		ft_unset(t_env *env, t_cmds *cmd);
 
 /*
@@ -159,10 +157,10 @@ int		builtin_caller(t_all *all, int builtin);
 ** executing/check_cmd.c
 */
 char	*check_file_permission(char *cmd, char *path_cmd, t_all *all);
-char	*handle_not_found(char *cmd, char **path, t_all *all);
+char	*handle_not_found(char *cmd, t_all *all);
 int		index_path_cmd(char *cmd, char **path);
 int		check_local(char *cmd, char **path_cmd);
-char	*get_path_cmd(char *cmd, char **path, t_all *all, int *flag);
+char	*get_path_cmd(char *cmd, char **path, t_all *all);
 
 /*
 ** executing/cmd_status.c
@@ -206,7 +204,7 @@ char	*str_dup_c(char *str, char c_limit, char c_join);
 int		count_str_c_limit(char *str, char c_limit);
 int		find_path_string(t_env **env);
 char	**split_c(char *str, char c_limit, char c_join);
-int		get_path_env(t_env *env, char ***path);
+char	**get_path_env(t_env *env, t_all *all);
 
 /*
 ** executing/shell_cmd.c
@@ -259,8 +257,8 @@ void	handle_line(t_all **all, char *line);
 /*
 ** parsing/handle_line_utils.c
 */
-void	safe_open(t_all *all, t_data *data, char *file, int type);
-void	handle_redirection(t_all *all, t_cmds **tmp, t_data *data, int fd);
+void	safe_open(t_data *data, char *file, int type);
+void	handle_redirection(t_cmds **tmp, t_data *data, int fd);
 int		process_lines(char **s, t_all *all, int i);
 
 /*
@@ -270,7 +268,7 @@ t_data	*init_data(void);
 t_all	*init_all(char **env);
 t_cmds	*add_next_cmds(t_cmds *current);
 t_data	*add_next_data(t_data *current);
-void	remove_cmd(t_cmds **current);
+t_cmds	*remove_cmd(t_cmds *current);
 
 /*
 ** parsing/redir_utils.c
@@ -331,9 +329,9 @@ void	*free_strs(char **strs);
 /*
 ** utils/free_functions.c
 */
-void	free_env(t_env *env, t_all *all);
-void	free_cmds(t_cmds *cmds, t_data *data);
-void	free_data(t_data *data, t_all *all);
+void	free_env(t_env *env);
+void	free_cmds(t_cmds *cmds);
+void	free_data(t_data *data);
 void	free_all(t_all *all);
 void	free_new_line(t_all *all);
 
@@ -371,5 +369,11 @@ char	*ft_strndup(char *str, int n);
 char	**env_to_strs(t_env *env, int i, int count);
 char	**cmds_to_strs(t_cmds *cmds, int count, int i);
 int		ft_strncmp(const char *s1, const char *s2, int n);
+
+extern int	g_stop;
+
+void	parent_handler(void);
+void	child_handler(void);
+void	here_doc_handler(void);
 
 #endif
